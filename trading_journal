@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Journal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table, th, td {
+      border: 1px solid #444;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:nth-child(even) {
+      background-color: #1e1e1e;
+    }
+    tr:hover {
+      background-color: #333;
+    }
+    input, textarea, select {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #444;
+      padding: 8px;
+      width: 90%;
+      margin: 5px 0;
+    }
+    input[type="submit"] {
+      background-color: #333;
+      border: none;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trading Journal</h1>
+  <form>
+    <table>
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Date</th>
+          <th>Bias</th>
+          <th>Point of Interest</th>
+          <th>Outcome</th>
+          <th>PnL ($)</th>
+          <th>Winner/Loser</th>
+          <th>Chart</th>
+          <th>Notes</th>
+          <th>Backtesting</th>
+        </tr>
+      </thead>
+      <tbody id="journal-entries">
+        <tr>
+          <td><input type="text" placeholder="Stock"></td>
+          <td><input type="date"></td>
+          <td><select><option>Long</option><option>Short</option></select></td>
+          <td><input type="text" placeholder="Point of Interest"></td>
+          <td><input type="text" placeholder="Outcome"></td>
+          <td><input type="number" placeholder="PnL"></td>
+          <td>
+            <select>
+              <option>Winner</option>
+              <option>Loser</option>
+            </select>
+          </td>
+          <td><input type="file" accept="image/*"></td>
+          <td><textarea placeholder="Notes"></textarea></td>
+          <td><textarea placeholder="Backtesting"></textarea></td>
+        </tr>
+      </tbody>
+    </table>
+    <input type="submit" value="Save Entry">
+  </form>
+</body>
+</html>
