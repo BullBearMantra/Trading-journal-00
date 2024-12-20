@@ -41,55 +41,150 @@
       width: 90%;
       margin: 5px 0;
     }
-    input[type="submit"] {
+    input[type="submit"], button {
       background-color: #333;
       border: none;
       cursor: pointer;
+      color: #ffffff;
+      padding: 10px;
     }
-    input[type="submit"]:hover {
+    input[type="submit"]:hover, button:hover {
       background-color: #555;
+    }
+    #analytics {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #1e1e1e;
+      border: 1px solid #444;
     }
   </style>
 </head>
 <body>
   <h1>Trading Journal</h1>
-  <form>
-    <table>
-      <thead>
-        <tr>
-          <th>Stock</th>
-          <th>Date</th>
-          <th>Bias</th>
-          <th>Point of Interest</th>
-          <th>Outcome</th>
-          <th>PnL ($)</th>
-          <th>Winner/Loser</th>
-          <th>Chart</th>
-          <th>Notes</th>
-          <th>Backtesting</th>
-        </tr>
-      </thead>
-      <tbody id="journal-entries">
-        <tr>
-          <td><input type="text" placeholder="Stock"></td>
-          <td><input type="date"></td>
-          <td><select><option>Long</option><option>Short</option></select></td>
-          <td><input type="text" placeholder="Point of Interest"></td>
-          <td><input type="text" placeholder="Outcome"></td>
-          <td><input type="number" placeholder="PnL"></td>
-          <td>
-            <select>
-              <option>Winner</option>
-              <option>Loser</option>
-            </select>
-          </td>
-          <td><input type="file" accept="image/*"></td>
-          <td><textarea placeholder="Notes"></textarea></td>
-          <td><textarea placeholder="Backtesting"></textarea></td>
-        </tr>
-      </tbody>
-    </table>
-    <input type="submit" value="Save Entry">
-  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>Stock</th>
+        <th>Date</th>
+        <th>Bias</th>
+        <th>Point of Interest</th>
+        <th>Outcome</th>
+        <th>PnL ($)</th>
+        <th>Winner/Loser</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="journal-entries">
+      <!-- Rows will be dynamically added here -->
+    </tbody>
+  </table>
+  <button id="add-row">Add Trade</button>
+  <button id="save-journal">Save Journal</button>
+  <button id="clear-journal">Clear Journal</button>
+
+  <div id="analytics">
+    <h2>Analytics</h2>
+    <p>Total Trades: <span id="total-trades">0</span></p>
+    <p>Total PnL: <span id="total-pnl">0</span></p>
+    <p>Win Rate: <span id="win-rate">0%</span></p>
+  </div>
+
+  <script>
+    const journalEntries = document.getElementById('journal-entries');
+    const totalTradesEl = document.getElementById('total-trades');
+    const totalPnLEl = document.getElementById('total-pnl');
+    const winRateEl = document.getElementById('win-rate');
+
+    // Load data from localStorage
+    function loadJournal() {
+      const savedJournal = JSON.parse(localStorage.getItem('tradingJournal')) || [];
+      savedJournal.forEach(addRow);
+      updateAnalytics();
+    }
+
+    // Add a new row
+    function addRow(data = {}) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="text" value="${data.stock || ''}" placeholder="Stock"></td>
+        <td><input type="date" value="${data.date || ''}"></td>
+        <td>
+          <select>
+            <option value="Long" ${data.bias === 'Long' ? 'selected' : ''}>Long</option>
+            <option value="Short" ${data.bias === 'Short' ? 'selected' : ''}>Short</option>
+          </select>
+        </td>
+        <td><input type="text" value="${data.poi || ''}" placeholder="Point of Interest"></td>
+        <td><input type="text" value="${data.outcome || ''}" placeholder="Outcome"></td>
+        <td><input type="number" value="${data.pnl || 0}" placeholder="PnL"></td>
+        <td>
+          <select>
+            <option value="Winner" ${data.result === 'Winner' ? 'selected' : ''}>Winner</option>
+            <option value="Loser" ${data.result === 'Loser' ? 'selected' : ''}>Loser</option>
+          </select>
+        </td>
+        <td><textarea placeholder="Notes">${data.notes || ''}</textarea></td>
+        <td><button onclick="deleteRow(this)">Delete</button></td>
+      `;
+      journalEntries.appendChild(row);
+    }
+
+    // Save journal to localStorage
+    function saveJournal() {
+      const rows = Array.from(journalEntries.children);
+      const data = rows.map(row => {
+        return {
+          stock: row.children[0].children[0].value,
+          date: row.children[1].children[0].value,
+          bias: row.children[2].children[0].value,
+          poi: row.children[3].children[0].value,
+          outcome: row.children[4].children[0].value,
+          pnl: parseFloat(row.children[5].children[0].value || 0),
+          result: row.children[6].children[0].value,
+          notes: row.children[7].children[0].value,
+        };
+      });
+      localStorage.setItem('tradingJournal', JSON.stringify(data));
+      updateAnalytics();
+      alert('Journal saved!');
+    }
+
+    // Update analytics
+    function updateAnalytics() {
+      const rows = Array.from(journalEntries.children);
+      const totalTrades = rows.length;
+      const totalPnL = rows.reduce((sum, row) => sum + parseFloat(row.children[5].children[0].value || 0), 0);
+      const winCount = rows.filter(row => row.children[6].children[0].value === 'Winner').length;
+      const winRate = totalTrades > 0 ? ((winCount / totalTrades) * 100).toFixed(2) : 0;
+
+      totalTradesEl.textContent = totalTrades;
+      totalPnLEl.textContent = totalPnL.toFixed(2);
+      winRateEl.textContent = `${winRate}%`;
+    }
+
+    // Clear journal
+    function clearJournal() {
+      if (confirm('Are you sure you want to clear the journal?')) {
+        localStorage.removeItem('tradingJournal');
+        journalEntries.innerHTML = '';
+        updateAnalytics();
+      }
+    }
+
+    // Delete a row
+    function deleteRow(button) {
+      button.parentElement.parentElement.remove();
+      updateAnalytics();
+    }
+
+    // Event listeners
+    document.getElementById('add-row').addEventListener('click', () => addRow());
+    document.getElementById('save-journal').addEventListener('click', saveJournal);
+    document.getElementById('clear-journal').addEventListener('click', clearJournal);
+
+    // Initialize
+    loadJournal();
+  </script>
 </body>
 </html>
